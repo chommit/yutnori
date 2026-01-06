@@ -55,6 +55,21 @@ function GameController() {
     const players = [Player("Player One - X", 1), Player("Player Two - O", 2)];
     let moves = new Array(5).fill(0); // pseudoqueue
     let rolls_left = 1;
+    let dice_roll_binary = [0, 0, 0, 0];
+
+    let activePlayer = players[0];
+    let winner = null;
+
+    const switchPlayerTurn = () => {
+        activePlayer = (activePlayer.get_token() === players[0].get_token()) ? players[1] : players[0];
+    };
+
+    const getActivePlayer = () => activePlayer;
+
+    const printNewRound = () => {
+        board.printBoard();
+        console.log(`${getActivePlayer().get_name()}'s turn.`)
+    };
 }
 
 // token: 1 or 2
@@ -65,5 +80,10 @@ function Player(_name, _token) {
     let num_pieces_finished = 0;
     const incr_num_finished = (count) => {num_pieces_finished += count};
     const modify_num_left = (count) => {num_pieces_left += count};
-    return { incr_num_finished, modify_num_left };
+    const get_num_finished = () => num_pieces_finished;
+    const get_num_left = () => num_pieces_left;
+    const get_name = () => name;
+    const get_token = () => token;
+    return { incr_num_finished, modify_num_left, get_num_finished, get_num_left,
+        get_name, get_token };
 }
