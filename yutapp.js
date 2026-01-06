@@ -42,3 +42,28 @@ function TileNode(node_name, _precond = null) {
     return { getName, addPiece, getPiece, removePiece, getPrecond };
 }
 
+
+/* 
+** The GameController will be responsible for controlling the 
+** flow and state of the game's turns, as well as whether
+** anybody has won the game.
+*/
+
+function GameController() {
+
+    const board = Gameboard();
+    const players = [Player("Player One - X", 1), Player("Player Two - O", 2)];
+    let moves = new Array(5).fill(0); // pseudoqueue
+    let rolls_left = 1;
+}
+
+// token: 1 or 2
+function Player(_name, _token) {
+    const name = _name;
+    const token = _token;
+    let num_pieces_left = 4;
+    let num_pieces_finished = 0;
+    const incr_num_finished = (count) => {num_pieces_finished += count};
+    const modify_num_left = (count) => {num_pieces_left += count};
+    return { incr_num_finished, modify_num_left };
+}
