@@ -8,6 +8,10 @@ const next_tile = new Map([['u1',['u2']],['u2',['u3']],['u3',['u4']],['u4',['l0'
 // entry [x, y] == being on tile x is precondition to enter tile y (star is weird)
 const precond_map = new Map([['l0', '1d1'], ['d0', '2d1'], ['star', '2d4'], ['star', '1d4']]);
 
+const tile_set = new Set(['u1', 'u2', 'u3', 'u4', 'l0', 'l1', 'l2', 'l3', 'l4', 
+    'd0', 'd1', 'd2', 'd3', 'd4', 'r0', 'r1', 'r2', 'r3', 'r4', 'u0', 'finish', 
+    '1d1', '1d2', 'star', '1d4', '1d5', '2d1', '2d2', '2d4', '2d5'])
+
 function Gameboard() {
     const board = {};
 
