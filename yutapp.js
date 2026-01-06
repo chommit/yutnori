@@ -79,7 +79,7 @@ function GameController() {
         }
     };
 
-    const ComputeMovement = () => { // add to move_queue + add one more roll under 4/5 roll
+    const ComputeMovement = () => { // add to move_queue + add one more roll under 4/5 roll + reduce rolls left
         let move_string = dice_roll_binary.join('');
         let movement;
         if (special_rolls.has(move_string)) {
@@ -91,6 +91,7 @@ function GameController() {
             movement = dice_roll_binary.reduce((acc, curr) => acc + curr, 0);
         }
         move_queue.push(movement);
+        rolls_left -= 1;
     }
 
     const resetTurnState = () => { // reset turn state of dice rolls, move_queue, rolls_left
