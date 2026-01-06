@@ -12,6 +12,8 @@ const tile_set = new Set(['u1', 'u2', 'u3', 'u4', 'l0', 'l1', 'l2', 'l3', 'l4',
     'd0', 'd1', 'd2', 'd3', 'd4', 'r0', 'r1', 'r2', 'r3', 'r4', 'u0', 'finish', 
     '1d1', '1d2', 'star', '1d4', '1d5', '2d1', '2d2', '2d4', '2d5'])
 
+const special_rolls = new Map([["0000", 5], ["1111", 4], ["1000", -1]]);
+
 function Gameboard() {
     const board = {}; // dumb board map of name -> TileNode, check next_tile for movements
     for (const keytile of tile_set) {
@@ -53,7 +55,7 @@ function GameController() {
 
     const board = Gameboard();
     const players = [Player("Player One - X", 1), Player("Player Two - O", 2)];
-    let moves = new Array(5).fill(0); // pseudoqueue
+    let move_queue = []; // pseudoqueue
     let rolls_left = 1;
     let dice_roll_binary = [0, 0, 0, 0];
 
@@ -70,6 +72,33 @@ function GameController() {
         board.printBoard();
         console.log(`${getActivePlayer().get_name()}'s turn.`)
     };
+
+    const rollDice = () => {
+        for (let i = 0; i < 4; i++) {
+            dice_roll_binary[i] = Math.floor(Math.random() * 2);
+        }
+    };
+
+    const ComputeMovement = () => { // add to move_queue + add one more roll under 4/5 roll
+        let move_string = dice_roll_binary.join('');
+        let movement;
+        if (special_rolls.has(move_string)) {
+            movement = special_rolls[move_string];
+            if (movement == 4 || movement == 5) {
+                rolls_left += 1;
+            }
+        } else {
+            movement = dice_roll_binary.reduce((acc, curr) => acc + curr, 0);
+        }
+        move_queue.push(movement);
+    }
+
+    const resetTurnState = () => { // reset turn state of dice rolls, move_queue, rolls_left
+        for (let i = 0; i < 4; i++) {
+            dice_roll_binary[i] = 0;
+        }
+        move_queue = [];
+    }
 }
 
 // token: 1 or 2
