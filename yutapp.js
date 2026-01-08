@@ -135,7 +135,7 @@ function GameController() {
         // tile is 'u4' etc, num_steps = [1, 5] + -1
         // returns destination array eg ['l1', '1d1']
         if (num_steps == -1) {
-            return computeBackwardsMovementArray(tile);
+            return prev_tile[tile];
         }
         let prev = '' // prev tile, only counts alt diagonal pathing 
         const move_array = [];
@@ -165,8 +165,6 @@ function GameController() {
         }
         return move_array;
     }
-
-    const computeBackwardsMovementArray = (tile) => {} // return tile when move by -1
 }
 
 // token: 1 or 2
