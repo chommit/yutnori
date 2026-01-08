@@ -4,9 +4,6 @@ const next_tile = new Map([['u1',['u2']],['u2',['u3']],['u3',['u4']],['u4',['l0'
     ['r3',['r4']],['r4',['u0']],['u0',['finish']],['finish',['finish']],
     ['1d1',['1d2']],['1d2',['1d3']],['1d3',['1d4','2d4']],['1d4',['1d5']],['1d5',['r0']],
     ['2d1',['2d2']],['2d2',['1d3']],['2d4',['2d5']],['2d5',['u0']]]);
-    
-// entry [x, y] == entering tile x requires a precondition to have started on tile y (star is weird)
-const precond_map = new Map([['1d1', 'l0'], ['2d1', 'd0']]);
 
 const tile_set = new Set(['u1', 'u2', 'u3', 'u4', 'l0', 'l1', 'l2', 'l3', 'l4', 
     'd0', 'd1', 'd2', 'd3', 'd4', 'r0', 'r1', 'r2', 'r3', 'r4', 'u0', 'finish', 
@@ -25,15 +22,13 @@ const special_rolls = new Map([["0000", 5], ["1111", 4], ["1000", -1]]);
 function Gameboard() {
     const board = {}; // dumb board map of name -> TileNode, check next_tile for movements
     for (const keytile of tile_set) {
-        const precond = precond_map.has(keytile) ? precond_map[keytile] : null;
-        board[keytile] = TileNode(keytile, precond);
+        board[keytile] = TileNode(keytile);
     }
 
 }
 
 // node_name: name of node eg 'u1'
-// precond: name of precond tile to enter this Node eg 'l0'
-function TileNode(node_name, _precond = null) {
+function TileNode(node_name) {
     const name = node_name;
     let piece = null;
 
