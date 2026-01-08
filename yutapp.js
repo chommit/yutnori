@@ -39,9 +39,21 @@ function TileNode(node_name, _precond = null) {
         }
     };
     const getPiece = () => piece;
-    const removePiece = () => {piece = null};
+    const removePiece = (capture) => {
+        const removed_count = capture ? piece.getStackCount() : 0;
+        piece = null
+        return removed_count;
+    };
     const getPrecond = () => precond;
     return { getName, addPiece, getPiece, removePiece, getPrecond };
+}
+
+function Piece(_token) {
+    const token = _token;
+    let stack = 1;
+    const stackPiece = (_piece) => (stack += _piece.getStackCount())
+    const getStackCount = () => stack;
+    return { stackPiece, getStackCount};
 }
 
 
@@ -58,6 +70,8 @@ function GameController() {
     let move_queue = []; // pseudoqueue
     let rolls_left = 1;
     let dice_roll_binary = [0, 0, 0, 0];
+    let selected_piece = null;
+    let selected_queue_index = -1;
 
     let activePlayer = players[0];
     let winner = null;
@@ -73,13 +87,14 @@ function GameController() {
         console.log(`${getActivePlayer().get_name()}'s turn.`)
     };
 
-    const rollDice = () => {
+    const rollDice = () => { // roll dice + + reduce rolls left
         for (let i = 0; i < 4; i++) {
             dice_roll_binary[i] = Math.floor(Math.random() * 2);
         }
+        rolls_left -= 1;
     };
 
-    const ComputeMovement = () => { // add to move_queue + add one more roll under 4/5 roll + reduce rolls left
+    const computeMovement = () => { // add to move_queue + add one more roll under 4/5 roll
         let move_string = dice_roll_binary.join('');
         let movement;
         if (special_rolls.has(move_string)) {
@@ -91,14 +106,28 @@ function GameController() {
             movement = dice_roll_binary.reduce((acc, curr) => acc + curr, 0);
         }
         move_queue.push(movement);
-        rolls_left -= 1;
     }
 
-    const resetTurnState = () => { // reset turn state of dice rolls, move_queue, rolls_left
+    const resetTurnState = () => { // reset turn state of dice rolls, move_queue, rolls_left, etc
         for (let i = 0; i < 4; i++) {
             dice_roll_binary[i] = 0;
         }
         move_queue = [];
+        selected_piece = null
+        selected_queue_index = -1;
+    }
+
+    const playRound = () => {
+        while (rolls_left > 0) {
+            rollDice();
+            computeMovement();
+            if (roll_left == 0) { // make move_queue judgement only when no more rolls to make
+                while (selected_piece == null || selected_queue_index == -1) { // dont do this
+
+                }
+            }
+        }
+        resetTurnState();
     }
 }
 
