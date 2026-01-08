@@ -2,15 +2,23 @@ const next_tile = new Map([['u1',['u2']],['u2',['u3']],['u3',['u4']],['u4',['l0'
     ['l1',['l2']],['l2',['l3']],['l3',['l4']],['l4',['d0']],['d0',['d1', '2d1']],['d1',['d2']],
     ['d2',['d3']],['d3',['d4']],['d4',['r0']],['r0',['r1']],['r1',['r2']],['r2',['r3']],
     ['r3',['r4']],['r4',['u0']],['u0',['finish']],['finish',['finish']],
-    ['1d1',['1d2']],['1d2',['star']],['star',['1d4','2d4']],['1d4',['1d5']],['1d5',['r0']],
-    ['2d1',['2d2']],['2d2',['star']],['2d4',['2d5']],['2d5',['u0']]]);
+    ['1d1',['1d2']],['1d2',['1d3']],['1d3',['1d4','2d4']],['1d4',['1d5']],['1d5',['r0']],
+    ['2d1',['2d2']],['2d2',['1d3']],['2d4',['2d5']],['2d5',['u0']]]);
     
 // entry [x, y] == entering tile x requires a precondition to have started on tile y (star is weird)
 const precond_map = new Map([['1d1', 'l0'], ['2d1', 'd0']]);
 
 const tile_set = new Set(['u1', 'u2', 'u3', 'u4', 'l0', 'l1', 'l2', 'l3', 'l4', 
     'd0', 'd1', 'd2', 'd3', 'd4', 'r0', 'r1', 'r2', 'r3', 'r4', 'u0', 'finish', 
-    '1d1', '1d2', 'star', '1d4', '1d5', '2d1', '2d2', '2d4', '2d5'])
+    '1d1', '1d2', '1d3', '1d4', '1d5', '2d1', '2d2', '2d4', '2d5'])
+
+const prev_tile = new Map([['u1', ['u0']], ['u2', ['u1']], ['u3', ['u2']], ['u4', ['u3']], ['l0', ['u4']],
+    ['l1', ['l0']], ['l2', ['l1']], ['l3', ['l2']], ['l4', ['l3']], 
+    ['d0', ['l4']], ['d1', ['d0']], ['d2', ['d1']], ['d3', ['d2']], ['d4', ['d3']], 
+    ['r0', ['d4', '1d5']], ['r1', ['r0']], ['r2', ['r1']], ['r3', ['r2']], ['r4', ['r3']],
+    ['u0', ['r4', '2d5']], ['finish', ['finish']], 
+    ['1d1', ['l0']], ['1d2', ['1d1']], ['1d3', ['1d2', '2d2']], ['1d4', ['1d3']], ['1d5', ['1d4']],
+    ['2d1', ['d0']], ['2d2', ['2d1']], ['2d4', ['1d3']], ['2d5', ['2d4']]]);
 
 const special_rolls = new Map([["0000", 5], ["1111", 4], ["1000", -1]]);
 
@@ -142,15 +150,15 @@ function GameController() {
                 move_array = next_tile[tile];
             } else {
                 for (const j = 0; j < move_array.size; j++) {
-                    if (move_array[j] === 'star') {
+                    if (move_array[j] === '1d3') {
                         if (prev === '1d2') {
-                            prev = 'star';
+                            prev = '1d3';
                             move_array[j] = '1d4';
                         } else if (prev == '2d2') {
-                            prev = 'star';
+                            prev = '1d3';
                             move_array[j] = '2d4';
                         } else {
-                            console.log("anamoly detected, no correct precond from star");
+                            console.log("anamoly detected, no correct precond from 1d3");
                             console.assert(false);
                         }
                     } else {
