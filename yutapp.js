@@ -28,7 +28,6 @@ function Gameboard() {
 function TileNode(node_name, _precond = null) {
     const name = node_name;
     let piece = null;
-    const precond = _precond;
 
     const getName = () => name;
     const addPiece = (_piece) => {
@@ -44,8 +43,7 @@ function TileNode(node_name, _precond = null) {
         piece = null
         return removed_count;
     };
-    const getPrecond = () => precond;
-    return { getName, addPiece, getPiece, removePiece, getPrecond };
+    return { getName, addPiece, getPiece, removePiece };
 }
 
 function Piece(_token) {
@@ -131,22 +129,41 @@ function GameController() {
     }
 
     const computeMoveArray = (tile, num_steps) => { // compute array of tiles to move to given tile + num_steps; forward
-        // tile is 'u4' etc, num_steps = [1, 5]
+        // tile is 'u4' etc, num_steps = [1, 5] + -1
         // returns destination array eg ['l1', '1d1']
-        const branch = true; // can branch off
+        if (num_steps == -1) {
+            return computeBackwardsMovementArray(tile);
+        }
+        let prev = '' // prev tile, only counts alt diagonal pathing 
         const move_array = [];
         for (const i = 0; i < num_steps; i++) {
             if (i == 0) {
+                prev = tile;
                 move_array = next_tile[tile];
             } else {
                 for (const j = 0; j < move_array.size; j++) {
-                    move_array[j] = next_tile[move_array[j]]
+                    if (move_array[j] === 'star') {
+                        if (prev === '1d2') {
+                            prev = 'star';
+                            move_array[j] = '1d4';
+                        } else if (prev == '2d2') {
+                            prev = 'star';
+                            move_array[j] = '2d4';
+                        } else {
+                            console.log("anamoly detected, no correct precond from star");
+                            console.assert(false);
+                        }
+                    } else {
+                        prev = move_array.at(-1); // part of hack, alt diagonal path tile is last elt of next_tile arr
+                        move_array[j] = next_tile[move_array[j]]
+                    }
                 }
             }
         }
         return move_array;
-
     }
+
+    const computeBackwardsMovementArray = (tile) => {} // return tile when move by -1
 }
 
 // token: 1 or 2
