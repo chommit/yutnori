@@ -39,7 +39,7 @@ function TileNode(node_name, _precond = null) {
         }
     };
     const getPiece = () => piece;
-    const removePiece = (capture) => {
+    const removePiece = (capture) => { // returns how many pieces returned to player's hand
         const removed_count = capture ? piece.getStackCount() : 0;
         piece = null
         return removed_count;
@@ -128,6 +128,24 @@ function GameController() {
             }
         }
         resetTurnState();
+    }
+
+    const computeMoveArray = (tile, num_steps) => { // compute array of tiles to move to given tile + num_steps; forward
+        // tile is 'u4' etc, num_steps = [1, 5]
+        // returns destination array eg ['l1', '1d1']
+        const branch = true; // can branch off
+        const move_array = [];
+        for (const i = 0; i < num_steps; i++) {
+            if (i == 0) {
+                move_array = next_tile[tile];
+            } else {
+                for (const j = 0; j < move_array.size; j++) {
+                    move_array[j] = next_tile[move_array[j]]
+                }
+            }
+        }
+        return move_array;
+
     }
 }
 
