@@ -7,7 +7,7 @@ const next_tile = new Map([['u1',['u2']],['u2',['u3']],['u3',['u4']],['u4',['l0'
 
 const tile_set = new Set(['u1', 'u2', 'u3', 'u4', 'l0', 'l1', 'l2', 'l3', 'l4', 
     'd0', 'd1', 'd2', 'd3', 'd4', 'r0', 'r1', 'r2', 'r3', 'r4', 'u0', 'finish', 
-    '1d1', '1d2', '1d3', '1d4', '1d5', '2d1', '2d2', '2d4', '2d5'])
+    '1d1', '1d2', '1d3', '1d4', '1d5', '2d1', '2d2', '2d4', '2d5', 'home'])
 
 const prev_tile = new Map([['u1', ['u0']], ['u2', ['u1']], ['u3', ['u2']], ['u4', ['u3']], ['l0', ['u4']],
     ['l1', ['l0']], ['l2', ['l1']], ['l3', ['l2']], ['l4', ['l3']], 
@@ -15,10 +15,8 @@ const prev_tile = new Map([['u1', ['u0']], ['u2', ['u1']], ['u3', ['u2']], ['u4'
     ['r0', ['d4', '1d5']], ['r1', ['r0']], ['r2', ['r1']], ['r3', ['r2']], ['r4', ['r3']],
     ['u0', ['r4', '2d5']], ['finish', ['finish']], 
     ['1d1', ['l0']], ['1d2', ['1d1']], ['1d3', ['1d2', '2d2']], ['1d4', ['1d3']], ['1d5', ['1d4']],
-    ['2d1', ['d0']], ['2d2', ['2d1']], ['2d4', ['1d3']], ['2d5', ['2d4']]]);
-
-const start_tile = new Map([[-1, ['nothing']], [1, ['u1']], [2, ['u2']], [3, ['u3']], 
-                            [4, ['u4']], [5, ['l0']]])
+    ['2d1', ['d0']], ['2d2', ['2d1']], ['2d4', ['1d3']], ['2d5', ['2d4']], 
+    ['home', ['home']]]);
 
 const special_rolls = new Map([["0000", 5], ["1111", 4], ["1000", -1]]);
 
@@ -140,9 +138,6 @@ function GameController() {
     const computeMoveArray = (tile = 'nothing', num_steps) => { // compute array of tiles to move to given tile + num_steps; forward
         // tile is 'u4' etc, num_steps = [1, 5] + -1
         // returns destination array eg ['l1', '1d1']
-        if (tile == 'nothing') {
-            return start_tile[num_steps];
-        }
         if (num_steps == -1) {
             return prev_tile[tile];
         }
