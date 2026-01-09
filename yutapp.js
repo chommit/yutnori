@@ -17,12 +17,15 @@ const prev_tile = new Map([['u1', ['u0']], ['u2', ['u1']], ['u3', ['u2']], ['u4'
     ['1d1', ['l0']], ['1d2', ['1d1']], ['1d3', ['1d2', '2d2']], ['1d4', ['1d3']], ['1d5', ['1d4']],
     ['2d1', ['d0']], ['2d2', ['2d1']], ['2d4', ['1d3']], ['2d5', ['2d4']]]);
 
+const start_tile = new Map([[-1, ['nothing']], [1, ['u1']], [2, ['u2']], [3, ['u3']], 
+                            [4, ['u4']], [5, ['l0']]])
+
 const special_rolls = new Map([["0000", 5], ["1111", 4], ["1000", -1]]);
 
 function Gameboard() {
-    const board = {}; // dumb board map of name -> TileNode, check next_tile for movements
+    const map_board = {}; // dumb board map of name -> TileNode, check next_tile for movements
     for (const keytile of tile_set) {
-        board[keytile] = TileNode(keytile);
+        map_board[keytile] = TileNode(keytile);
     }
 
 }
@@ -46,7 +49,8 @@ function TileNode(node_name) {
         piece = null
         return removed_count;
     };
-    return { getName, addPiece, getPiece, removePiece };
+    const pieceExists = () => (piece !== null);
+    return { getName, addPiece, getPiece, removePiece, pieceExists };
 }
 
 function Piece(_token) {
@@ -54,7 +58,8 @@ function Piece(_token) {
     let stack = 1;
     const stackPiece = (_piece) => (stack += _piece.getStackCount())
     const getStackCount = () => stack;
-    return { stackPiece, getStackCount};
+    const getToken = () => token;
+    return { stackPiece, getStackCount, getToken };
 }
 
 
@@ -131,9 +136,12 @@ function GameController() {
         resetTurnState();
     }
 
-    const computeMoveArray = (tile, num_steps) => { // compute array of tiles to move to given tile + num_steps; forward
+    const computeMoveArray = (tile = 'nothing', num_steps) => { // compute array of tiles to move to given tile + num_steps; forward
         // tile is 'u4' etc, num_steps = [1, 5] + -1
         // returns destination array eg ['l1', '1d1']
+        if (tile == 'nothing') {
+            return start_tile[num_steps];
+        }
         if (num_steps == -1) {
             return prev_tile[tile];
         }
@@ -164,6 +172,17 @@ function GameController() {
             }
         }
         return move_array;
+    }
+
+    const makePieceMove = (piece, start_tile = 'nothing', dest_tile) => { 
+        // generalizing movement method handles captures, stacks, finishes, and most other things
+        const dest_node = board.map_board[dest_tile];
+        const dest_piece = dest_node.getPiece(); // null if DNE
+        if (!dest_node.pieceExists()) {
+            
+        } else if (dest_piece.) {
+
+        }
     }
 }
 
