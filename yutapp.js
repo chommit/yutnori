@@ -25,7 +25,11 @@ function Gameboard() {
     for (const keytile of tile_set) {
         map_board[keytile] = TileNode(keytile);
     }
-
+    // FIXME hardcoded tokens, # players
+    map_board[1] = HomeNode(1);
+    map_board[2] = HomeNode(2);
+    const getMap = () => {map_board};
+    return { getMap };
 }
 
 // node_name: name of node eg 'u1'
@@ -91,6 +95,9 @@ function Piece(_token) {
 function GameController() {
 
     const board = Gameboard();
+    // FIXME hardcoded tokens, # players
+    board.getMap()[1].addStackOfPieces(4);
+    board.getMap()[2].addStackOfPieces(4);
     const players = [Player("Player One - X", 1), Player("Player Two - O", 2)];
     let move_queue = []; // pseudoqueue
     let rolls_left = 1;
