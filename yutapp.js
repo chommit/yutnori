@@ -3,11 +3,12 @@ const next_tile = new Map([['u1',['u2']],['u2',['u3']],['u3',['u4']],['u4',['l0'
     ['d2',['d3']],['d3',['d4']],['d4',['r0']],['r0',['r1']],['r1',['r2']],['r2',['r3']],
     ['r3',['r4']],['r4',['u0']],['u0',['finish']],['finish',['finish']],
     ['1d1',['1d2']],['1d2',['1d3']],['1d3',['1d4','2d4']],['1d4',['1d5']],['1d5',['r0']],
-    ['2d1',['2d2']],['2d2',['1d3']],['2d4',['2d5']],['2d5',['u0']]], ['home', 'u1']);
+    ['2d1',['2d2']],['2d2',['1d3']],['2d4',['2d5']],['2d5',['u0']], ['home1', ['u1']],
+    ['home2', ['u1']]]);
 
 const tile_set = new Set(['u1', 'u2', 'u3', 'u4', 'l0', 'l1', 'l2', 'l3', 'l4', 
     'd0', 'd1', 'd2', 'd3', 'd4', 'r0', 'r1', 'r2', 'r3', 'r4', 'u0', 'finish', 
-    '1d1', '1d2', '1d3', '1d4', '1d5', '2d1', '2d2', '2d4', '2d5', 'home'])
+    '1d1', '1d2', '1d3', '1d4', '1d5', '2d1', '2d2', '2d4', '2d5', 'home1', 'home2']);
 
 const prev_tile = new Map([['u1', ['u0']], ['u2', ['u1']], ['u3', ['u2']], ['u4', ['u3']], ['l0', ['u4']],
     ['l1', ['l0']], ['l2', ['l1']], ['l3', ['l2']], ['l4', ['l3']], 
@@ -16,7 +17,10 @@ const prev_tile = new Map([['u1', ['u0']], ['u2', ['u1']], ['u3', ['u2']], ['u4'
     ['u0', ['r4', '2d5']], ['finish', ['finish']], 
     ['1d1', ['l0']], ['1d2', ['1d1']], ['1d3', ['1d2', '2d2']], ['1d4', ['1d3']], ['1d5', ['1d4']],
     ['2d1', ['d0']], ['2d2', ['2d1']], ['2d4', ['1d3']], ['2d5', ['2d4']], 
-    ['home', ['home']]]);
+    ['home1', ['home1']], ['home2', ['home2']]]);
+
+const token_to_home_map = new Map([[1, 'home1'], [2, 'home2']]) // FIXME hardcoded tokens
+const home_set = new Set(['home1', 'home2']);
 
 const special_rolls = new Map([["0000", 5], ["1111", 4], ["1000", -1]]);
 
@@ -26,8 +30,8 @@ function Gameboard() {
         map_board[keytile] = TileNode(keytile);
     }
     // FIXME hardcoded tokens, # players
-    map_board[1] = HomeNode(1);
-    map_board[2] = HomeNode(2);
+    map_board['home1'] = HomeNode('home1');
+    map_board['home2'] = HomeNode('home2');
     const getMap = () => {map_board};
     return { getMap };
 }
@@ -46,16 +50,16 @@ function TileNode(node_name) {
         }
     };
     const getPiece = () => piece;
-    const removePiece = () => { // returns how many pieces removed from tile
-        const removed_count = piece.getStackCount();
+    const removePiece = () => { // returns the removed piece stack
+        const removed_piece = piece;
         piece = null
-        return removed_count;
+        return removed_piece;
     };
     const pieceExists = () => (piece !== null);
     return { getName, addPiece, getPiece, removePiece, pieceExists };
 }
 
-// node_name: token of node eg 1, 2, etc
+// node_name: token of node eg 'home1', 'home2', etc
 function HomeNode(node_name) {
     const name = node_name;
     const piece_arr = [];
@@ -66,14 +70,21 @@ function HomeNode(node_name) {
             piece_arr.push(Piece(name));
         }
     };
-    const popPiece = () => {
-        const piece = piece_arr.pop();
-        return piece;
+    const addPiece = (stack_of_pieces) => {
+        addStackOfPieces(stack_of_pieces.getStackCount());
+    }
+    const removePiece = () => {
+        if (piece_arr.size > 0) {
+            const piece = piece_arr.pop();
+            return piece;
+        } else {
+            return null;
+        }
     };
     const pieceExists = () => piece_arr.size > 0;
     const pieceArrSize = () => piece_arr.size;
 
-    return { getName, addStackOfPieces, popPiece, pieceArrSize, pieceExists };
+    return { getName, addPiece, addStackOfPieces, removePiece, pieceArrSize, pieceExists };
 }
 
 function Piece(_token) {
@@ -96,8 +107,8 @@ function GameController() {
 
     const board = Gameboard();
     // FIXME hardcoded tokens, # players
-    board.getMap()[1].addStackOfPieces(4);
-    board.getMap()[2].addStackOfPieces(4);
+    board.getMap()['home1'].addStackOfPieces(4);
+    board.getMap()['home2'].addStackOfPieces(4);
     const players = [Player("Player One - X", 1), Player("Player Two - O", 2)];
     let move_queue = []; // pseudoqueue
     let rolls_left = 1;
@@ -163,10 +174,13 @@ function GameController() {
         resetTurnState();
     }
 
-    const computeMoveArray = (tile = 'nothing', num_steps) => { // compute array of tiles to move to given tile + num_steps; forward
+    const computeMoveArray = (tile, num_steps) => { // compute array of tiles to move to given tile + num_steps; forward
         // tile is 'u4' etc, num_steps = [1, 5] + -1
         // returns destination array eg ['l1', '1d1']
         if (num_steps == -1) {
+            if (home_set.has(tile)) {
+                return tile; // home back
+            } 
             return prev_tile[tile];
         }
         let prev = '' // prev tile, only counts alt diagonal pathing 
@@ -198,16 +212,16 @@ function GameController() {
         return move_array;
     }
 
-    const makePieceMove = (piece, start_tile, dest_tile) => { 
+    const makePieceMove = (start_tile, dest_tile) => { 
         // generalizing movement method handles captures, stacks, finishes, and most other things
         // must handle move generation, piece init outside
         const dest_node = board.map_board[dest_tile];
         const dest_piece = dest_node.getPiece(); // null if DNE
+        const start_node = board.getMap()[start_tile];
+        const piece = start_node.removePiece(); // the piece we wish to move
 
-        // remove piece from old start
-        if (start_tile != 'nothing') {
-            const start_node = board.map_board[start_tile];
-            start_node.removePiece();
+        if (home_set.has(dest_tile)) { // mega edge case
+            return;
         }
 
         // move piece to new dest
@@ -217,7 +231,9 @@ function GameController() {
             dest_node.addPiece(piece);
         } else { // do capture
             getNonActivePlayer().incr_num_left(dest_piece.getStackCount());
-            dest_node.removePiece();
+            const removed_piece = dest_node.removePiece();
+            const home_key = token_to_home_map[removed_piece.getToken()] // 'home1' or 'home2'
+            board.getMap()[home_key].addPiece(removed_piece);
             dest_node.addPiece(piece);
             rolls_left += 1;
         }
