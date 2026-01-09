@@ -51,6 +51,27 @@ function TileNode(node_name) {
     return { getName, addPiece, getPiece, removePiece, pieceExists };
 }
 
+// node_name: token of node eg 1, 2, etc
+function HomeNode(node_name) {
+    const name = node_name;
+    const piece_arr = [];
+
+    const getName = () => name;
+    const addStackOfPieces = (count) => {
+        for (const i = 0; i < count; i++) {
+            piece_arr.push(Piece(name));
+        }
+    };
+    const popPiece = () => {
+        const piece = piece_arr.pop();
+        return piece;
+    };
+    const pieceExists = () => piece_arr.size > 0;
+    const pieceArrSize = () => piece_arr.size;
+
+    return { getName, addStackOfPieces, popPiece, pieceArrSize, pieceExists };
+}
+
 function Piece(_token) {
     const token = _token;
     let stack = 1;
@@ -170,7 +191,7 @@ function GameController() {
         return move_array;
     }
 
-    const makePieceMove = (piece, start_tile = 'nothing', dest_tile) => { 
+    const makePieceMove = (piece, start_tile, dest_tile) => { 
         // generalizing movement method handles captures, stacks, finishes, and most other things
         // must handle move generation, piece init outside
         const dest_node = board.map_board[dest_tile];
