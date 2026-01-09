@@ -44,8 +44,8 @@ function TileNode(node_name) {
         }
     };
     const getPiece = () => piece;
-    const removePiece = (capture) => { // returns how many pieces returned to player's hand
-        const removed_count = capture ? piece.getStackCount() : 0;
+    const removePiece = () => { // returns how many pieces removed from tile
+        const removed_count = piece.getStackCount();
         piece = null
         return removed_count;
     };
@@ -176,12 +176,22 @@ function GameController() {
 
     const makePieceMove = (piece, start_tile = 'nothing', dest_tile) => { 
         // generalizing movement method handles captures, stacks, finishes, and most other things
+        // must handle move generation outside
         const dest_node = board.map_board[dest_tile];
         const dest_piece = dest_node.getPiece(); // null if DNE
+        // move piece to new dest
         if (!dest_node.pieceExists()) {
             
-        } else if (dest_piece.) {
+        } else if (dest_piece.getToken() == getActivePlayer().get_token()) { // do stack
 
+        } else { // do capture
+
+        }
+
+        // remove piece from old start
+        if (start_tile != 'nothing') {
+            const start_node = board.map_board[start_tile];
+            start_node.removePiece()
         }
     }
 }
