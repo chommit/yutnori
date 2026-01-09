@@ -87,6 +87,7 @@ function GameController() {
     };
 
     const getActivePlayer = () => activePlayer;
+    const getNonActivePlayer = () => (activePlayer.get_token() === players[0].get_token()) ? players[1] : players[0];
 
     const printNewRound = () => {
         board.printBoard();
@@ -176,22 +177,31 @@ function GameController() {
 
     const makePieceMove = (piece, start_tile = 'nothing', dest_tile) => { 
         // generalizing movement method handles captures, stacks, finishes, and most other things
-        // must handle move generation outside
+        // must handle move generation, piece init outside
         const dest_node = board.map_board[dest_tile];
         const dest_piece = dest_node.getPiece(); // null if DNE
-        // move piece to new dest
-        if (!dest_node.pieceExists()) {
-            
-        } else if (dest_piece.getToken() == getActivePlayer().get_token()) { // do stack
-
-        } else { // do capture
-
-        }
 
         // remove piece from old start
         if (start_tile != 'nothing') {
             const start_node = board.map_board[start_tile];
-            start_node.removePiece()
+            start_node.removePiece();
+        }
+
+        // move piece to new dest
+        if (!dest_node.pieceExists()) {
+            dest_node.addPiece(piece);
+        } else if (dest_piece.getToken() == getActivePlayer().get_token()) { // do stack
+            dest_node.addPiece(piece);
+        } else { // do capture
+            getNonActivePlayer().incr_num_left(dest_piece.getStackCount());
+            dest_node.removePiece();
+            dest_node.addPiece(piece);
+            rolls_left += 1;
+        }
+
+        if (dest_node === 'finish') {
+            getActivePlayer().incr_num_finished(dest_piece.getStackCount());
+            dest_node.removePiece();
         }
     }
 }
@@ -203,11 +213,11 @@ function Player(_name, _token) {
     let num_pieces_left = 4;
     let num_pieces_finished = 0;
     const incr_num_finished = (count) => {num_pieces_finished += count};
-    const modify_num_left = (count) => {num_pieces_left += count};
+    const incr_num_left = (count) => {num_pieces_left += count};
     const get_num_finished = () => num_pieces_finished;
     const get_num_left = () => num_pieces_left;
     const get_name = () => name;
     const get_token = () => token;
-    return { incr_num_finished, modify_num_left, get_num_finished, get_num_left,
+    return { incr_num_finished, incr_num_left, get_num_finished, get_num_left,
         get_name, get_token };
 }
